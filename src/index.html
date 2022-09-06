@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+		<meta charset="utf-8">
+		<title>Putt Till You DIE</title>
+
+    <link rel="stylesheet" href="style.css">
+  </head>
+  
+	<body oncontextmenu="return false;"> <!-- Disable right click menus -->
+
+    <!-- Texture Atlas -->
+    <img id="i" class="i" src="data:image/png;base64,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">
+
+    <!-- Heads Up Display -->
+    <div id="hud" class="i">
+      <div id="hd" class="h"><h1>HOLE</h1><h2 id="ht">1</h2></div>
+      <div id="pd" class="h"><h1>PUTTS</h1><h2 id="pt">0</h2></div>
+      <div id="td" class="h"><h1>TOTAL</h1><h2 id="tt">0</h2></div>
+      <div id="ad" class="h"><h1>AVERAGE</h1><h2 id="at">0</h2></div>
+    </div>
+
+    <!-- Title Screen -->
+    <div id="ts" class="i">
+      <h3>PUTT TILL YOU</h3>
+      <h4>DIE</h4>
+      <h5>An Antix Development production for js13k 2022</h5>
+      <a id="ok" onclick="hideTitle();">OK</a>
+    </div>
+
+    <!-- Instruction Screen -->
+    <div id="is" class='i'>
+      <h3>INSTRUCTIONS</h3><br>
+      <h6>HOLD AND MOVE THE LEFT MOUSE BUTTON TO AIM,<br>
+      A LONGER LINE MEANS MORE PUTT POWER.<br><br>
+      RELEASE LEFT MOUSE BUTTON TO PUTT.<br><br>
+      PRESS SPACE KEY TO CANCEL AIMING,<br>
+      OR RELEASE LEFT MOUSE BUTTON WHILE PUTTER IS RED.<br><br>
+      AVOID SAND AND WATER TRAPS.<br><br>
+      HOLD THE SHIFT KEY TO SHOW YOUR STATISTICS.
+    </h6>
+      <a id="ok" onclick="hideInstructions();">OK</a>
+    </div>
+
+    <!-- Stats Screen -->
+    <div id="ss" class="i">
+      <h3>STATISTICS</h3>
+
+      <h6 id="s0"></h6> <!-- total play time -->
+      <br>
+
+      <h6 id="s1"></h6> <!-- holes in one -->
+      <h6 id="s2"></h6> <!-- two -->
+      <h6 id="s3"></h6> <!-- three -->
+      <br>
+
+      <h6 id="s4"></h6> <!-- close calls -->
+      <br>
+
+      <h6 id="s5"></h6> <!-- bumps -->
+      <h6 id="s6"></h6> <!-- flips -->
+      <h6 id="s7"></h6> <!-- rebounds -->
+      <br>
+
+      <h6 id="s8"></h6> <!-- sand shots -->
+      <h6 id="s9"></h6> <!-- water shots -->
+      <br>
+      <br>
+
+    </div>
+    
+	</body>
+
+  <script type="application/javascript" src="game.js"></script>
+
+</html>

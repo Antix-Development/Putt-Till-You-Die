@@ -1,0 +1,111 @@
+/* Mini-Putt Golfing styles */
+
+/* All elements */
+* {
+  margin: 0;
+  padding: 0;
+  outline: 0; /* Disable tabstop outlines */
+  user-select: none; /* Disable selection of any element*/
+  color: #eee;
+  text-shadow: 2px 2px 1px #000;
+  text-align: center;
+  font-weight: 900; /* Make the font as thick as possible */
+}
+
+/* Default HTML */
+html {
+  font-family: "Bradley Hand ITC", "Bradley Hand Bold"; /* Fonts should hopefully be the same on Windows and MacOS */
+  line-height: 2.0em;
+  background-color: #7bb87b;
+  overflow: hidden;
+}
+
+/* Foreground canvas */
+#fg, #hud {
+  left: 0;
+  top: 0;
+}
+
+/* OK button */
+#ok {
+  margin-top: 1em;
+  display: inline-block;
+  width: 2em;
+  height: 1em;
+  border-radius: 2em;
+  line-height: 1em;
+  border: 4px solid #232;
+  background-color: #595;
+  font-size: 5em;
+}
+
+/* OK button pressed down */
+#ok:active {
+  transform: scale(.9);
+}
+
+/* Invisible */
+.i {
+  display: none;
+}
+
+#ss {
+  border-top: 4px solid #9b9;
+  background-color: #595;
+  border-bottom: 4px solid #373;
+}
+
+/* Title screen, and Help screen */
+#ts, #is, #ss {
+  width: 100%;
+  z-index: 1000;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+/* Title > PUTT TILL YOU */
+h3 {
+  font-size: 5em;
+  line-height: 1.5em;
+}
+
+/* Title > DIE */
+h4 {
+  font-size: 25em;
+  line-height: .6em;
+}
+
+/* Title > YES, YOU COULD REALLY DIE PLAYING THIS GAME! */
+h5 {
+  font-size: 1.7em;
+  line-height: .7em;
+}
+
+/* HUD */
+.h {
+  width: 210px;
+  height: 80px;
+}
+
+/* HUD text element title */
+h1 {
+  font-size: 2em;
+}
+
+/* HUD text element counter */
+h2 {
+  font-size: 3em;
+}
+
+/* HUD text element counter */
+h6 {
+  font-size: 2.5em;
+  line-height: 1.10em;
+}
+
+/* A bunch of elements are positioned absolutely */
+#bg, #fg, #hud, #ts, #is, #ss, .h {
+  position: absolute;
+}
