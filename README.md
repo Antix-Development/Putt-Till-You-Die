@@ -2,7 +2,7 @@
 
 # Putt Till You Die
 
-<p align="center"><img src="img/400X250.png"></p>
+<p align="center"><img src="https://github.com/Antix-Development/Putt-Till-You-Die/blob/master/img/160X160.png"></p>
 
 <br>
 
