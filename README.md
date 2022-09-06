@@ -26,11 +26,22 @@ Also during the production of this game, my dear friend *Ewook* passed away afte
 
 The aim of Putt Till You Die is to basically putt the ball into the goal. That's prety much it.
 
+Putt Till You Die is fairly easy to operate..
+- Hold and move the left mouse button to aim, a longer line means more putt power.
+- Press space key to cancel aiming.
+- Release the left mouse button to make your putt.
+- Hold the shift key to show your statistics.
+
+Putt Till You Die is best enjoyed in fullscreen and with some chillout music playing in the background.
+
+Note that when you close the Putt Till You Die application, the game state will be persisted to the browsers local storage, so the next time you start Putt Till You Die, the game will continue exactly in the same state.
+
 <br>
 
 ## Features
 
 - Unlimited procedural generated holes!
+- High resolution graphics.
 - Seeded PRNG (Pseudo Random Number Generator) so the game is the same across devices.
 - A persistent game state.
 
@@ -48,7 +59,8 @@ Sound effects were created using Frank Force's fantastic [ZzFX](https://killedby
 
 [Terser](https://terser.org/) was used to minify the JavaScript code.
 
-Putt Till You Die has been tested working in FireFox and Chrome browsers on Windows10, your milage might vary with other browsers and operating systems.
+Putt Till You Die has been tested working in [FireFox](https://mozilla.org/firefox/) and [Chrome](https://google.com/chrome/)
+ browsers, your milage might vary with other browsers.
 
 <br>
 
