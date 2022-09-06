@@ -6,9 +6,9 @@
 
 <br>
 
-Putt Till You Die is my first submission for the 2022 [js13kGames](https://js13kgames.com) competition, where over a one month period you create a game based on a theme (dEATH FOR 2022) and then you cram your entire game (code and assets) into a 13Kb zip file and submit it.
+Putt Till You Die is my first submission for the 2022 [js13kGames](https://js13kgames.com) competition, where over a one month period you create a game based on a theme (death for 2022) and then you cram your entire game (code and assets) into a 13Kb zip file and submit it.
 
-You can play Putt Till You Die on [its js13k competition page](https://js13kgames.com/entries/), or download and load index.html from this repository.
+You can play Putt Till You Die on [its js13k competition page](https://js13kgames.com/entries/), or download and load index.html from this repository in your web browser.
 
 <br>
 
@@ -38,9 +38,9 @@ The aim of Putt Till You Die is to basically putt the ball into the goal. That's
 
 ## Technologies
 
-Putt TIll You Die was developed using Visual Studio Code and Notepad++.
+Putt TIll You Die was developed using [Visual Studio Code](https://code.visualstudio.com/) and [Notepad++](https://notepad-plus-plus.org/).
 
-Particle imagery was created using GIMP, and all other imagery is drawn programatically.
+Particle imagery was created using [GIMP](https://gimp.org/), and all other imagery is programatically generated.
 
 Sound effects were created using Frank Force's fantastic [ZzFX](https://killedbyapixel.github.io/ZzFX/).
 
@@ -48,7 +48,7 @@ Sound effects were created using Frank Force's fantastic [ZzFX](https://killedby
 
 [Terser](https://terser.org/) was used to minify the JavaScript code.
 
-Putt Till You Die has been tested working in FireFox and Chrome browsers, your milage might vary with other browsers.
+Putt Till You Die has been tested working in FireFox and Chrome browsers on Windows10, your milage might vary with other browsers and operating systems.
 
 <br>
 
