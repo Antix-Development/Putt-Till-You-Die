@@ -60,7 +60,7 @@ Sound effects were created using Frank Force's fantastic [ZzFX](https://killedby
 [Terser](https://terser.org/) was used to minify the JavaScript code.
 
 Putt Till You Die has been tested working in [FireFox](https://mozilla.org/firefox/) and [Chrome](https://google.com/chrome/)
- browsers, your milage might vary with other browsers.
+ browsers on a Windows10 laptop, your milage might vary with other browsers and operating systems.
 
 <br>
 

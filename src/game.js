@@ -2006,6 +2006,8 @@ spawnSand = () => {
 
   // Cancel any aiming when the SPACE key is released
   D.onkeyup = (e) => {
+    console.log(e);
+    
     if ((e.keyCode === 32) && (gameMode === MODE_PLAY)) { // was the SPACE key released?
 
       erasePutter(); // Erase the putter graphic

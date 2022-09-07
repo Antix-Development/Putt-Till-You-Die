@@ -49,14 +49,14 @@ html {
   display: none;
 }
 
-#ss {
+#ss #rs {
   border-top: 4px solid #9b9;
   background-color: #595;
   border-bottom: 4px solid #373;
 }
 
 /* Title screen, and Help screen */
-#ts, #is, #ss {
+#ts, #is, #ss #rs {
   width: 100%;
   z-index: 1000;
   top: 50%;
