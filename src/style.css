@@ -26,21 +26,24 @@ html {
   top: 0;
 }
 
-/* OK button */
-#ok {
+/* buttons */
+.btn {
   margin-top: 1em;
+  margin-left: .1em;
+  margin-right: .1em;
+  padding: .1em .5em;
   display: inline-block;
   width: 2em;
   height: 1em;
   border-radius: 2em;
   line-height: 1em;
   border: 4px solid #232;
-  background-color: #595;
+  background-color: #484;
   font-size: 5em;
 }
 
-/* OK button pressed down */
-#ok:active {
+/* Button pressed down */
+.btn:active {
   transform: scale(.9);
 }
 
@@ -49,20 +52,30 @@ html {
   display: none;
 }
 
-#ss #rs {
+/* Stat and reset screens */
+#ss, #rs {
   border-top: 4px solid #9b9;
   background-color: #595;
   border-bottom: 4px solid #373;
 }
 
-/* Title screen, and Help screen */
-#ts, #is, #ss #rs {
+/* Title screen, stat screen, reset screen, and instruction screen */
+#ts, #is, #ss, #rs {
   width: 100%;
   z-index: 1000;
   top: 50%;
   left: 50%;
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
+}
+
+/* A bunch of elements are positioned absolutely */
+#bg, #fg, #hud, #ts, #is, #ss, #rs, .h {
+  position: absolute;
+}
+
+#is {
+  background-color: #7bb87b;
 }
 
 /* Title > PUTT TILL YOU */
@@ -77,16 +90,10 @@ h4 {
   line-height: .6em;
 }
 
-/* Title > YES, YOU COULD REALLY DIE PLAYING THIS GAME! */
+/* Title > An Antix Development production for js13k 2022 */
 h5 {
   font-size: 1.7em;
   line-height: .7em;
-}
-
-/* HUD */
-.h {
-  width: 210px;
-  height: 80px;
 }
 
 /* HUD text element title */
@@ -102,10 +109,11 @@ h2 {
 /* HUD text element counter */
 h6 {
   font-size: 2.5em;
-  line-height: 1.10em;
+  line-height: 1em;
 }
 
-/* A bunch of elements are positioned absolutely */
-#bg, #fg, #hud, #ts, #is, #ss, .h {
-  position: absolute;
+/* HUD element */
+.h {
+  width: 210px;
+  height: 80px;
 }

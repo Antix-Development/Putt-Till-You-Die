@@ -28,10 +28,11 @@ SOFTWARE.
 
 const
 launchTime        = Date.now(),
+
 D                 = document,
 W                 = window,
 STORAGE           = W.localStorage,
-SAVEFILE_NAME     = 'com.antix.miniputtgolf', // Namespace for localstorage operations
+SAVEFILE_NAME     = 'com.antix.ptyd', // Namespace for localstorage operations
 M                 = Math,
 PI                = M.PI,
 PI2               = M.PI * 2,
@@ -93,6 +94,20 @@ canvasHeight      = (oneCell * 5) + 4;
 // 
 
 let
+
+// Various screens
+statsScreen,
+titleScreen,
+titleScreenButtons,
+hudScreen,
+resetScreen,
+resetScreenButtons,
+instructionScreen,
+instructionScreenButtons,
+
+instructionsVisible,
+dontResetOnInstructionsClosed,
+
 ATLAS, // Image containing particle images
 
 particles = [], // Collection of particle effects
@@ -185,6 +200,21 @@ hideByID = (id) => getByID(id).classList.add('i'),
 // Show the HTML element with the given id
 showByID = (id) => getByID(id).classList.remove('i'),
 
+
+
+// Make the given HTML element visible or invisible, according to the given state
+showElement = (el, state) => (state) ? el.classList.remove('i') : el.classList.add('i'),
+
+// Enable or disable the given HTML element, according to the given state
+enableElement = (el, state) => (state) ? el.classList.remove('d') : el.classList.add('d'),
+
+// Create a new HTML element of the given type
+createElement = (type) => D.createElement(type),
+
+
+
+
+
 // Update the `innerHTML` of the element with the given id, with the given text
 setTextByID = (id, t) => getByID(id).innerHTML = t,
 
@@ -195,6 +225,16 @@ clamp = (v, min, max) => v < min ? min : v > max ? max : v,
 setMode = (mode) => {
   gameMode = mode;
   console.log(`gameMode changed to ${['MODE_NONE', 'MODE_INSTRUCTIONS', 'MODE_PLAY', 'MODE_FADE_OUT', 'MODE_FADE_IN'][mode]}`);
+},
+
+// Create a new button with the given label and onclick function
+newButton = (label, onclick) => {
+  let b = D.createElement('a');
+  b.classList.add('btn');
+  b.innerHTML = label;
+  b.onclick = onclick;
+
+  return b;
 },
 
 // Create a new canvas with the given dimensions and id, then append it to the document body
@@ -922,75 +962,51 @@ let nextHole = () => {
 // Generate a new hole
 generateHole = () => {
 
-  console.log('RANDOMSEED:');
-  console.log(rng.getSeed());
-
   gameState.seed = rng.getSeed(); // Store the random seed
 
-  // width:                      5, // Path dimensions
-  // height:                     5,
-  // maxPathLength:              4, // Maximum number of nodes (excluding extra nodes) to generate
-  // generateExtraNodes:         true, // True if we want to generate side rooms off the main path.
-  // chanceToGenerateExtraNode:  1, // Chance (0-1) to generate side rooms.
-  // maxExtraNodes:              0, // Maximum number of side rooms to generate.
-  // chanceToGenerateObstacle:   .35, // Chance to generate an obstacle in any empty `PathNode` that is NOT an extra node. TODO variable should scale over time  
-  // chanceToGenerateWindmill:   .35, // Chance to generate a windmill, otherwise generate a blocker
+  // 
+  // Update generatr params
+  // 
+  
+  let maxWidthOrHeight = 3; // Max width and height of any hole
 
+  generatorParameters.maxPathLength = 4;
+  generatorParameters.chanceToGenerateExtraNode = .3;
+  generatorParameters.chanceToGenerateObstacle = .3;
+  generatorParameters.chanceToGenerateWindmill = .25;
 
-// Calculate max width and height of any hole
-let maxWidthOrHeight = 3;
+  if (gameState.hole < 4) {
+    generatorParameters.chanceToGenerateObstacle = .1; // Don't generate any obstacles for thr first 4 holes
+  }
 
-generatorParameters.maxPathLength = 4;
+  if (gameState.hole > 5) {
+    maxWidthOrHeight ++;
+    generatorParameters.maxPathLength = 6;
+    generatorParameters.chanceToGenerateExtraNode = .45;
+    generatorParameters.chanceToGenerateObstacle = .4;
+    generatorParameters.chanceToGenerateWindmill = .3;
+  }
 
-generatorParameters.chanceToGenerateExtraNode = .3;
+  if (gameState.hole > 10) {
+    generatorParameters.maxPathLength = 8;
+    generatorParameters.chanceToGenerateExtraNode = .6;
+    generatorParameters.chanceToGenerateObstacle = .5;
+    generatorParameters.chanceToGenerateWindmill = .35;
+  }
 
-generatorParameters.chanceToGenerateObstacle = .3;
+  if (gameState.hole > 15) {
+    maxWidthOrHeight ++;
+    generatorParameters.maxPathLength = 10;
+    generatorParameters.chanceToGenerateExtraNode = .75;
+    generatorParameters.chanceToGenerateObstacle = .6;
+    generatorParameters.chanceToGenerateWindmill = .4;
+  }
 
-generatorParameters.chanceToGenerateWindmill = .25;
-
-if (gameState.hole < 4) {
-  generatorParameters.chanceToGenerateObstacle = 0; // Don't generate any obstacles for thr first 4 holes
-}
-
-if (gameState.hole > 5) {
-  maxWidthOrHeight ++;
-  generatorParameters.maxPathLength = 6;
-  generatorParameters.chanceToGenerateExtraNode = .45;
-  generatorParameters.chanceToGenerateObstacle = .4;
-  generatorParameters.chanceToGenerateWindmill = .3;
-}
-
-if (gameState.hole > 10) {
-  generatorParameters.maxPathLength = 8;
-  generatorParameters.chanceToGenerateExtraNode = .6;
-  generatorParameters.chanceToGenerateObstacle = .5;
-  generatorParameters.chanceToGenerateWindmill = .35;
-}
-
-if (gameState.hole > 15) {
-  maxWidthOrHeight ++;
-  generatorParameters.maxPathLength = 10;
-  generatorParameters.chanceToGenerateExtraNode = .75;
-  generatorParameters.chanceToGenerateObstacle = .6;
-  generatorParameters.chanceToGenerateWindmill = .4;
-}
-
-generatorParameters.width = getRandomIntInclusive(3, maxWidthOrHeight);
-generatorParameters.height = getRandomIntInclusive(3, maxWidthOrHeight);
-
-
-
-
-console.log('GENERATOR PARAMS:');
-console.log(generatorParameters);
-
-
-
-
+  generatorParameters.width = getRandomIntInclusive(3, maxWidthOrHeight);
+  generatorParameters.height = getRandomIntInclusive(3, maxWidthOrHeight);
 
   hazzards = []; // Clear hazzards and objects from previous hole
   objects = [];
-
 
   generateMainPathNodes(generatorParameters); // Generate a new path using the given options
 
@@ -1843,246 +1859,242 @@ spawnSand = () => {
     1, // scale
     [1, 1, 32, 32], // TextureRegion (x, y, w, h) - SAND
   );
-};
+},
 
 //#region -- Putter management (aiming, putting, rendering)
 
-  // Erase the area where the putter was, in preperation to draw it in its new position/orientation
-  let erasePutter = () => {
-    if (mouseMovePosition) {
+// Erase the area where the putter was, in preperation to draw it in its new position/orientation
+erasePutter = () => {
+  if (mouseMovePosition) {
 
-      /*
-      Swapping the coordinates around is a bit  convoluted but required so that the rectangular area 
-      to be cleared can be expanded on all sides by an arbitrary number of pixels, which is required 
-      for the entire area of the putter to be cleared correctly.
+    /*
+    Swapping the coordinates around is a bit  convoluted but required so that the rectangular area 
+    to be cleared can be expanded on all sides by an arbitrary number of pixels, which is required 
+    for the entire area of the putter to be cleared correctly.
 
-      TODO: Research a more efficient method to acomplish the clear.
+    TODO: Research a more efficient method to acomplish the clear.
 
-      In reality  it would  just be easier  to clear the entire  canvas, but that's not very mobile
-      friendly. However, do we really need to care about mobile users???
+    FG_CTX.clearRect(0, 0, FG_CANVAS.width, FG_CANVAS.height);
 
-      FG_CTX.clearRect(0, 0, FG_CANVAS.width, FG_CANVAS.height);
-
-      */
-      
-      let x = clamp(mouseMovePosition.x, 0, W.innerWidth), // Calculate top left corner of rectangular area to clear
-      w = mouseDownPosition.x - x,
-
-      y = clamp(mouseMovePosition.y, 0, W.innerHeight), // Calculate bottom right corner of rectangular area to clear
-      h = mouseDownPosition.y; - y;
-
-      if (mouseDownPosition.x < mouseMovePosition.x) { // Recalculate top left if required
-        x = mouseDownPosition.x;
-        w = mouseMovePosition.x - x;
-      }
-
-      if (mouseDownPosition.y < mouseMovePosition.y) { // Recalculate bottom right if required
-        y = mouseDownPosition.y;
-        h = mouseMovePosition.y - y;
-      }
-
-      FG_CTX.clearRect(x - 8, y - 8, w + 16, h + 16); // Clear the rectangle (expanded by 3 pixels on each edge)
-
-      // console.log(`erasePutter() x=${x} y=${y} w=${w} h=${h}`);
-    }
-  };
-
-  // Save the position of the `mousedown` event (when the left mouse button was pressed down)
-  D.onmousedown = (e) => {
-    if ((putterEnabled) && (e.button === 0) && (gameMode === MODE_PLAY)) {
-      if (length(ball.V) === 0) mouseDownPosition = Vec2(e.x, e.y); // Create the mouse down coordinates ONLY if the ball is also not moving
-    }
-  };
-
-  // Update the putter according to mouse movement, when the left mouse button is held down
-  D.onmousemove = (e) => {
-    if ((mouseDownPosition) && (putterEnabled) && (gameMode === MODE_PLAY)) { // Only proceed if the left mouse button is held down
-
-      erasePutter();
-
-      let sx = mouseDownPosition.x, // Cache coordinates
-      sy = mouseDownPosition.y,
-      x = e.x,
-      y = e.y;
-
-      puttAngle = atan2(sy - y, sx - x); // Get direction that the ball will move in IF a putt is initiated
-
-      let pa = atan2(y - sy, x - sx); // Get direction that the putter is facing
-
-      let b = PI * .25, // 45 degree angle in radians
-      c = b * 2, // 90 degree angle in radians
-
-      x1 = cos(pa - b) * 8, // Generate pointy end coordinates
-      y1 = sin(pa - b) * 8,
-      x2 = cos(pa + b) * 8,
-      y2 = sin(pa + b) * 8,
-
-      x3 = cos(pa - c) * 6, // Generate flat end coordinates
-      y3 = sin(pa - c) * 6,
-      x4 = cos(pa + c) * 6,
-      y4 = sin(pa + c) * 6;
-
-      putterLength = distance(mouseDownPosition, {x, y}), // Get the distance between the `mousedown` and `mouseup` events
-      
-      // Set putter color according to it's length
-      putterColor = 'fff';
-      if (putterLength < MIN_PUTTER_LENGTH) putterColor = 'f44'; // If putter length is very short, make it red to signify that releasing it will NOT initiate a new putt
-
-      if (putterLength > MAX_PUTTER_LENGTH) putterLength = MAX_PUTTER_LENGTH; // Constrain length
-
-      x = (cos(pa) * putterLength) + sx; // Generate constrained end of shaft coordinates
-      y = (sin(pa) * putterLength) + sy;
-
-      mouseMovePosition = {x, y}; // Save for later calculations and checks
-
-      FG_CTX.strokeStyle = `#${putterColor}`; // Putter color
-      FG_CTX.lineWidth = 3; // Thickness
-
-      FG_CTX.beginPath(); // Begin the path that defines the putter (in lines)
-
-      let moveToFG = (x, y) => {
-        FG_CTX.moveTo(x, y);
-      },
-
-      lineToFG = (x, y) => {
-        FG_CTX.lineTo(x, y);
-      };
-
-      moveToFG(x1 + sx, y1 + sy); // Pointy end
-      lineToFG(sx, sy);
-      lineToFG(x2 + sx, y2 + sy);
-
-      moveToFG(sx, sy); // Shaft
-      lineToFG(x, y);
-
-      moveToFG(x3 + x, y3 + y); // Flat end
-      lineToFG(x4 + x, y4 + y);
-
-      FG_CTX.stroke(); // Draw the putter
-    }
-  };
-
-  // Initiate a new putt if the putter is enabled, the left mouse was released, and `mouseDownPosition` exists
-  D.onmouseup = (e) => {
-    if ((putterEnabled) &&(e.button === 0) && (mouseDownPosition) && (gameMode === MODE_PLAY)) {
-
-      erasePutter();
-
-      mouseMovePosition = null;
-      mouseDownPosition = null;
-  
-      if (putterLength > MIN_PUTTER_LENGTH) { // Is the putter length long enough to initiate a new putt?
-        // Yes.. initiate a new putt
-
-        putterEnabled = false; // Prevent putter aiming
-
-        if (ball.inSand) { // Is the ball currently in the sand?
-
-          fx_play(SOUND_SAND); // Play the sand sound effect
-          spawnSand(); // Create a sand particle moving in a random direction
-
-        } else {
-
-          fx_play(SOUND_PUTT); // Play the normal putting sound effect
-        }
-
-        ballResetPosition = ball.C; // Save position for edge cases where the ball escapes the confines of the hole
-
-        let puttMagnitude = putterLength / MAX_PUTTER_LENGTH; // Get magnitude (0-1)
-
-        ball.V = Vec2(cos(puttAngle) * (puttMagnitude * MAX_BALL_SPEED), sin(puttAngle) * (puttMagnitude * MAX_BALL_SPEED)); // Set the balls velocity
-
-        putterLength = 0; // Set to 0 to stop phantom putts
-
-        gameState.putts ++;
-
-        gameState.total ++;
-
-        updateHUD();
-
-      } // End "putter length okay" check
-    } // End "putter enabled, and mousedown and up exist" check
-  };
-
-  // Cancel any aiming when the SPACE key is released
-  D.onkeyup = (e) => {
-    console.log(e);
+    */
     
-    if ((e.keyCode === 32) && (gameMode === MODE_PLAY)) { // was the SPACE key released?
+    let x = clamp(mouseMovePosition.x, 0, W.innerWidth), // Calculate top left corner of rectangular area to clear
+    w = mouseDownPosition.x - x,
 
-      erasePutter(); // Erase the putter graphic
+    y = clamp(mouseMovePosition.y, 0, W.innerHeight), // Calculate bottom right corner of rectangular area to clear
+    h = mouseDownPosition.y; - y;
 
-      mouseMovePosition = null; // Clear all positioning variables so no putter is drawn
-      mouseDownPosition = null;
+    if (mouseDownPosition.x < mouseMovePosition.x) { // Recalculate top left if required
+      x = mouseDownPosition.x;
+      w = mouseMovePosition.x - x;
+    }
+
+    if (mouseDownPosition.y < mouseMovePosition.y) { // Recalculate bottom right if required
+      y = mouseDownPosition.y;
+      h = mouseMovePosition.y - y;
+    }
+
+    FG_CTX.clearRect(x - 8, y - 8, w + 16, h + 16); // Clear the rectangle (expanded by 3 pixels on each edge)
+
+    // console.log(`erasePutter() x=${x} y=${y} w=${w} h=${h}`);
+  }
+},
+
+//Reset the putter
+resetPutter = () => {
+
+  erasePutter(); // Erase the putter graphic
+
+  mouseMovePosition = null; // Clear all positioning variables so no putter is drawn
+  mouseDownPosition = null;
+
+  putterLength = 0; // Set to 0 to stop phantom putts
+
+};
+
+
+// Save the position of the `mousedown` event (when the left mouse button was pressed down)
+D.onmousedown = (e) => {
+  if ((putterEnabled) && (e.button === 0) && (gameMode === MODE_PLAY)) {
+    if (length(ball.V) === 0) mouseDownPosition = Vec2(e.x, e.y); // Create the mouse down coordinates ONLY if the ball is also not moving
+  }
+};
+
+// Update the putter according to mouse movement, when the left mouse button is held down
+D.onmousemove = (e) => {
+  if ((mouseDownPosition) && (putterEnabled) && (gameMode === MODE_PLAY)) { // Only proceed if the left mouse button is held down
+
+    erasePutter();
+
+    let sx = mouseDownPosition.x, // Cache coordinates
+    sy = mouseDownPosition.y,
+    x = e.x,
+    y = e.y;
+
+    puttAngle = atan2(sy - y, sx - x); // Get direction that the ball will move in IF a putt is initiated
+
+    let pa = atan2(y - sy, x - sx); // Get direction that the putter is facing
+
+    let b = PI * .25, // 45 degree angle in radians
+    c = b * 2, // 90 degree angle in radians
+
+    x1 = cos(pa - b) * 8, // Generate pointy end coordinates
+    y1 = sin(pa - b) * 8,
+    x2 = cos(pa + b) * 8,
+    y2 = sin(pa + b) * 8,
+
+    x3 = cos(pa - c) * 6, // Generate flat end coordinates
+    y3 = sin(pa - c) * 6,
+    x4 = cos(pa + c) * 6,
+    y4 = sin(pa + c) * 6;
+
+    putterLength = distance(mouseDownPosition, {x, y}), // Get the distance between the `mousedown` and `mouseup` events
+    
+    // Set putter color according to it's length
+    putterColor = 'fff';
+
+    if (putterLength > MAX_PUTTER_LENGTH) putterLength = MAX_PUTTER_LENGTH; // Constrain length
+
+    x = (cos(pa) * putterLength) + sx; // Generate constrained end of shaft coordinates
+    y = (sin(pa) * putterLength) + sy;
+
+    mouseMovePosition = {x, y}; // Save for later calculations and checks
+
+    FG_CTX.strokeStyle = '#fff'; // Putter color
+    FG_CTX.lineWidth = 3; // Thickness
+
+    FG_CTX.beginPath(); // Begin the path that defines the putter (in lines)
+
+    let moveToFG = (x, y) => {
+      FG_CTX.moveTo(x, y);
+    },
+
+    lineToFG = (x, y) => {
+      FG_CTX.lineTo(x, y);
+    };
+
+    moveToFG(x1 + sx, y1 + sy); // Pointy end
+    lineToFG(sx, sy);
+    lineToFG(x2 + sx, y2 + sy);
+
+    moveToFG(sx, sy); // Shaft
+    lineToFG(x, y);
+
+    moveToFG(x3 + x, y3 + y); // Flat end
+    lineToFG(x4 + x, y4 + y);
+
+    FG_CTX.stroke(); // Draw the putter
+  }
+};
+
+// Initiate a new putt if the putter is enabled, the left mouse was released, and `mouseDownPosition` exists
+D.onmouseup = (e) => {
+  if ((putterEnabled) &&(e.button === 0) && (mouseDownPosition) && (gameMode === MODE_PLAY)) {
+
+    erasePutter();
+
+    mouseMovePosition = null;
+    mouseDownPosition = null;
+
+    // Yes.. initiate a new putt
+
+    putterEnabled = false; // Prevent putter aiming
+
+    if (ball.inSand) { // Is the ball currently in the sand?
+
+      fx_play(SOUND_SAND); // Play the sand sound effect
+      spawnSand(); // Create a sand particle moving in a random direction
+
+    } else {
+
+      fx_play(SOUND_PUTT); // Play the normal putting sound effect
+    }
+
+    ballResetPosition = ball.C; // Save position for edge cases where the ball escapes the confines of the hole
+
+    let puttMagnitude = putterLength / MAX_PUTTER_LENGTH; // Get magnitude (0-1)
+
+    ball.V = Vec2(cos(puttAngle) * (puttMagnitude * MAX_BALL_SPEED), sin(puttAngle) * (puttMagnitude * MAX_BALL_SPEED)); // Set the balls velocity
+
+    putterLength = 0; // Set to 0 to stop phantom putts
+
+    gameState.putts ++;
+
+    gameState.total ++;
+
+    updateHUD();
+
+  } // End "putter enabled, and mousedown and up exist" check
+};
+
+// Manage key up events
+D.onkeyup = (e) => {
+  console.log(e);
+
+  if (gameMode === MODE_PLAY) {
+
+    switch (e.keyCode) {
+      case 32: // SPACE key released?
+
+        resetPutter();
   
-      putterLength = 0; // Set to 0 to stop phantom putts
+        e.preventDefault();
+        break;
+    
+      case 16: // SHIFT key released?
+        showElement(statScreen, false); // Hide the stats screen
+        statsVisible = false;
+        e.preventDefault();
+        break;
 
-      e.preventDefault();
-    }
+      case 8: // BACKSPACE key released?
+        resetPutter();
+        showElement(resetScreen, true);
+        e.preventDefault();
+        break;
 
-    if ((e.keyCode === 16) && (gameMode === MODE_PLAY)) { // was the SPACE key released?
+      case 192: // TILDE key released?
+        resetPutter();
+        showElement(instructionScreen, true);
+        instructionsVisible = true;
+        dontResetOnInstructionsClosed = true;
+        e.preventDefault();
+        break;
 
-      statsVisible = false;
-      hideByID('ss');
+      default:
+        break;
+    } // End "keycode switch"
+    
+  } // End "MODE_PLAY" check
+};
 
-      e.preventDefault();
-    }
+// Manage key down events
+D.onkeydown = (e) => {
+  // console.log(e);
 
-  };
+  if ((e.keyCode === 16) && (gameMode === MODE_PLAY) && (!statsVisible)) { // was the SHIFT key pressed?
+
+    updateStatPage();
+
+    showByID('ss');
+
+    secondCounter = 0; // Reset counter for live elapsed play time
+    statsVisible = true;
+    
+    e.preventDefault();
+  }
 
 
-  D.onkeydown = (e) => {
-    // console.log(e);
 
-    if ((e.keyCode === 16) && (gameMode === MODE_PLAY) && (!statsVisible)) { // was the TAB key pressed?
-      console.log('tabby');
 
-      updateStatPage();
 
-      showByID('ss');
-
-      secondCounter = 0; // Reset counter for live elapsed play time
-      statsVisible = true;
-      
-      e.preventDefault();
-    }
-  };
+};
 
 //#endregion
   
 
 
-ATLAS = getByID('i'); // Get the image from the HTML document, which contains particle imagery
 
-// 
-// Create HTML canvasses and attach them to the document body
-// 
-
-// Background (the hole) will be drawn on this canvas
-BG_CANVAS = newCanvas(canvasWidth, canvasHeight, 'bg'); // Create a new canvas
-BG_CTX = BG_CANVAS.ctx; // Get drawing context
-
-// Windmills, Ball, and particles will be drawn on this canvas
-OBJ_CANVAS = newCanvas(canvasWidth, canvasHeight, 'bg');
-OBJ_CTX = OBJ_CANVAS.ctx;
-
-// Putter will be drawn on this canvas
-FG_CANVAS = newCanvas(W.innerWidth, W.innerHeight, 'fg');
-FG_CTX = FG_CANVAS.ctx;
-
-// Create the soundbank
-
-fx_add([1,409,.01,.09,.09,1,.45,-11,3.5,0,0,0,0,0,0,0,.94,0,0]); // SOUND_WATER
-fx_add([1,1888,0,.01,.11,4,2.88,0,-5.9,0,0,0,0,143,0,0,1,.11,0]); // SOUND_SAND
-fx_add([1.99,9,.01,0,.01,3,1.94,0,-0.3,0,0,0,0,0,0,.49,1,.03,0]); // SOUND_PUTT
-fx_add([3.35,1101,.02,0,0,0,2.14,0,-27,119,0,.02,1,0,0,.37,1,0,.42]); // SOUND_WALL
-fx_add([1.22,681,.07,.15,.42,0,1.42,0,.3,-377,.14,.11,0,0,.1,.04,.88,.23,0]); // SOUND_GOAL
-fx_add([1.62,45,.02,.3,.34,1,1.21,0,0,172,.02,.18,0,0,.1,.08,.85,.17,.22]); // SOUND_HOLEINONE
-fx_add([1,233,0,.11,.44,1,1.6,0,-0.5,0,0,0,0,5.1,0,0,.88,.15,0]); // SOUND_SOCLOSE
-fx_add([1.02,538,.01,.03,.18,0,1.42,.2,0,0,0,0,0,25,.1,0,.68,.03,.12]); // SOUND_BUTTON
-fx_add([1,47,.01,.09,.09,4,1.81,0,0,0,0,0,0,0,0,0,.57,.02,0]); // SOUND_BLOCKER
-fx_add([1,377,.02,.01,.01,3,1.97,0,-34,613,.12,0,0,-84,0,0,1,.02,.07]); // SOUND_WINDMILL
-fx_add([1.88,575,.09,.18,.41,2,.09,-1.4,0,124,.18,.11,0,0,0,.16,.81,.21,.46]); // SOUND_BALLFIXED
 
 //#region -- Content repositioning on browser window resize
 
@@ -2111,7 +2123,6 @@ let repositionContent = () => {
 
 W.onresize = repositionContent; // Reposition content whenever the browser window is resized
 
-repositionContent(); // Perform initial rescale
 
 //#endregion
 
@@ -2141,18 +2152,11 @@ updateStatPage = () => {
 
   setTextByID('s8', `Sand shots: ${gameState.beached}`);
   setTextByID('s9', `Water shots:  ${gameState.splashes}`);
-}
-
-
-let secondsToHMS = (s) => `${floor(s / 3600)}h, ${floor(s % 3600 / 60)}m, ${floor(s % 3600 % 60)}s`;
-
-let updatePlayTime = () => setTextByID('s0', `Play time: ${secondsToHMS(gameState.playTime + (Date.now() - launchTime) / 1000)}`);
-
-
+},
 
 // #region -- Game state management
 
-let loadGameState = () => {
+loadGameState = () => {
   
   tempVar = STORAGE.getItem(SAVEFILE_NAME); // Attempt to load a previously saved game state
 
@@ -2295,39 +2299,134 @@ let saveGameState = () => {
 
 W.onbeforeunload = saveGameState; // Save the game state whenever the page is closed
 
-loadGameState();
 
-console.log('GAMESTATE:')
-console.log(gameState);
+
+
+
+
+// When the page is loaded, execute this code, which actually starts the ball rolling (pun fully intended)
+W.onload = () => {
+
+  console.log('page loaded');
+
+  // 
+  // Get various screens
+  // 
+
+  statsScreen = getByID('ss');
+  titleScreen = getByID('ts');
+  titleScreenButtons = getByID('tsb');
+  hudScreen = getByID('hud');
+  resetScreen = getByID('rs');
+  resetScreenButtons = getByID('rsb');
+  instructionScreen = getByID('is');
+  instructionScreenButtons = getByID('isb');
+
+  // 
+  // Create menu buttons
+  // 
+
+  titleScreenButtons.appendChild(newButton('OK', () => {
+    fx_play(SOUND_BUTTON); // Play sound effect
+    showElement(titleScreen, false); // Hide title screen
+    setMode(MODE_INSTRUCTIONS); // Set mode
+    showElement(instructionScreen, true); // Show instruction screen
+  }));
+
+  instructionScreenButtons.appendChild(newButton('OK', () => {
+    fx_play(SOUND_BUTTON); // Play sound effect
+    showElement(instructionScreen, false); // Hide instruction screen
+
+    instructionsVisible = false;
+
+    if (!dontResetOnInstructionsClosed) {
+      setOpacity(0); // Essentially make the entire document contents invisible
+  
+      generateHole(); // Generate the current hole
+    
+      showElement(hudScreen, true); // Show HUD
+    
+      fadeInOutCounter = 0;
+      setMode(MODE_FADE_IN); // Set mode
+    }
+
+
+  }));
+
+  resetScreenButtons.appendChild(newButton('YES', () => {
+    showElement(resetScreen, false);
+    W.onbeforeunload = null; // Stop the gamestate being saved, which would cause the game to not fully reset
+    STORAGE.removeItem(SAVEFILE_NAME); // Remove the local data
+    location.reload(); // Reload!
+  }));
+
+  resetScreenButtons.appendChild(newButton('NO', () => {
+    showElement(resetScreen, false);
+  }));
+
+
+
+
+
+
+  ATLAS = getByID('i'); // Get the image from the HTML document, which contains particle imagery
+
+  // 
+  // Create HTML canvasses and attach them to the document body
+  // 
+  
+  // Background (the hole) will be drawn on this canvas
+  BG_CANVAS = newCanvas(canvasWidth, canvasHeight, 'bg'); // Create a new canvas
+  BG_CTX = BG_CANVAS.ctx; // Get drawing context
+  
+  // Windmills, Ball, and particles will be drawn on this canvas
+  OBJ_CANVAS = newCanvas(canvasWidth, canvasHeight, 'bg');
+  OBJ_CTX = OBJ_CANVAS.ctx;
+  
+  // Putter will be drawn on this canvas
+  FG_CANVAS = newCanvas(W.innerWidth, W.innerHeight, 'fg');
+  FG_CTX = FG_CANVAS.ctx;
+  
+  // Create the soundbank
+  
+  fx_add([1,409,.01,.09,.09,1,.45,-11,3.5,0,0,0,0,0,0,0,.94,0,0]); // SOUND_WATER
+  fx_add([1,1888,0,.01,.11,4,2.88,0,-5.9,0,0,0,0,143,0,0,1,.11,0]); // SOUND_SAND
+  fx_add([1.99,9,.01,0,.01,3,1.94,0,-0.3,0,0,0,0,0,0,.49,1,.03,0]); // SOUND_PUTT
+  fx_add([3.35,1101,.02,0,0,0,2.14,0,-27,119,0,.02,1,0,0,.37,1,0,.42]); // SOUND_WALL
+  fx_add([1.22,681,.07,.15,.42,0,1.42,0,.3,-377,.14,.11,0,0,.1,.04,.88,.23,0]); // SOUND_GOAL
+  fx_add([1.62,45,.02,.3,.34,1,1.21,0,0,172,.02,.18,0,0,.1,.08,.85,.17,.22]); // SOUND_HOLEINONE
+  fx_add([1,233,0,.11,.44,1,1.6,0,-0.5,0,0,0,0,5.1,0,0,.88,.15,0]); // SOUND_SOCLOSE
+  fx_add([1.02,538,.01,.03,.18,0,1.42,.2,0,0,0,0,0,25,.1,0,.68,.03,.12]); // SOUND_BUTTON
+  fx_add([1,47,.01,.09,.09,4,1.81,0,0,0,0,0,0,0,0,0,.57,.02,0]); // SOUND_BLOCKER
+  fx_add([1,377,.02,.01,.01,3,1.97,0,-34,613,.12,0,0,-84,0,0,1,.02,.07]); // SOUND_WINDMILL
+  fx_add([1.88,575,.09,.18,.41,2,.09,-1.4,0,124,.18,.11,0,0,0,.16,.81,.21,.46]); // SOUND_BALLFIXED
+  
+
+  loadGameState();
+
+  console.log('GAMESTATE:')
+  console.log(gameState);
+  
+
+  repositionContent(); // Perform initial rescale
+
+
+
+  
+lastFrame = Date.now(); // Set the (fake) last EnterFrame event time
+onEnterFrame(); // Request the first actual EnterFrame event
+
+
+};
+
+
 
 // #endregion
 
-// Hide the title screen and show the instructions screen
-let hideTitle = () => {
-  fx_play(SOUND_BUTTON); // Play sound effect
-  hideByID('ts'); // Hide title screen
 
-  setMode(MODE_INSTRUCTIONS); // Set mode
-  showByID('is'); // Show instruction screen
-},
-
-// Hide the instruction screen, generate the first hole, and start the scene fading in
-hideInstructions = () => {
-  fx_play(SOUND_BUTTON); // Play sound effect
-  hideByID('is'); // Hide instruction screen
-
-  setOpacity(0); // Essentially make the entire document contents invisible
-
-  generateHole();
-
-  showByID('hud'); // Show HUD
-
-  fadeInOutCounter = 0;
-  setMode(MODE_FADE_IN); // Set mode
-},
 
 // Check and resolve collisions between the ball and hazzards ()
-checkResolveHazzardCollisions = () => {
+let checkResolveHazzardCollisions = () => {
 
   let ballResetX = ball.C.x;
   ballResetY = ball.C.y;
@@ -2450,7 +2549,12 @@ checkResolveHazzardCollisions = () => {
 
   } // End "balll not in goal" check
   
-};
+},
+
+
+secondsToHMS = (s) => `${floor(s / 3600)}h, ${floor(s % 3600 / 60)}m, ${floor(s % 3600 % 60)}s`,
+
+updatePlayTime = () => setTextByID('s0', `Play time: ${secondsToHMS(gameState.playTime + (Date.now() - launchTime) / 1000)}`),
 
 
 
@@ -2458,7 +2562,7 @@ checkResolveHazzardCollisions = () => {
 // The main game logic loop
 // 
 
-let onEnterFrame = () => {
+onEnterFrame = () => {
 
   statUpdateRequired = false; // No update required
 
@@ -2826,7 +2930,4 @@ let onEnterFrame = () => {
   } // End "statistic update required" check
 
   requestAnimationFrame(onEnterFrame); // Request next animation frame event
-}
-
-lastFrame = Date.now(); // Set the (fake) last EnterFrame event time
-onEnterFrame(); // Request the first actual EnterFrame event
+};
