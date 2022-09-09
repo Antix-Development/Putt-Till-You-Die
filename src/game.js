@@ -205,16 +205,6 @@ showByID = (id) => getByID(id).classList.remove('i'),
 // Make the given HTML element visible or invisible, according to the given state
 showElement = (el, state) => (state) ? el.classList.remove('i') : el.classList.add('i'),
 
-// Enable or disable the given HTML element, according to the given state
-enableElement = (el, state) => (state) ? el.classList.remove('d') : el.classList.add('d'),
-
-// Create a new HTML element of the given type
-createElement = (type) => D.createElement(type),
-
-
-
-
-
 // Update the `innerHTML` of the element with the given id, with the given text
 setTextByID = (id, t) => getByID(id).innerHTML = t,
 
@@ -548,66 +538,6 @@ computeRectNormals = (shape, i) => {
   }
 },
 
-// Find the axis of least penetration between two rects
-// findAxisLeastPenetration = (rect, otherRect, collisionInfo) => {
-//   var
-//   n,
-//   i,
-//   j,
-//   supportPoint,
-//   bestDistance = 1e9,
-//   bestIndex = -1,
-//   hasSupport = 1,
-//   tmpSupportPoint,
-//   tmpSupportPointDist;
-
-//   for(i = 4; hasSupport && i--;){
-    
-//     // Retrieve a face normal from A
-//     n = rect.N[i];
-
-//     // use -n as direction and the vertex on edge i as point on edge
-//     var
-//     dir = scale(n, -1),
-//     ptOnEdge = rect.X[i],
-    
-//     // find the support on B
-//     vToEdge,
-//     projection;
-//     tmpSupportPointDist = -1e9;
-//     tmpSupportPoint = -1;
-    
-//     // check each vector of other object
-//     for(j = 4; j--;){
-//       vToEdge = subtract(otherRect.X[j], ptOnEdge);
-//       projection = dot(vToEdge, dir);
-      
-//       // find the longest distance with certain edge
-//       // dir is -n direction, so the distance should be positive     
-//       if(projection > 0 && projection > tmpSupportPointDist){
-//         tmpSupportPoint = otherRect.X[j];
-//         tmpSupportPointDist = projection;
-//       }
-//     }
-//     hasSupport = (tmpSupportPoint !== -1);
-    
-//     // get the shortest support point depth
-//     if(hasSupport && tmpSupportPointDist < bestDistance){
-//       bestDistance = tmpSupportPointDist;
-//       bestIndex = i;
-//       supportPoint = tmpSupportPoint;
-//     }
-//   }
-  
-//   if(hasSupport){
-    
-//     // all four directions have support point
-//     setInfo(collisionInfo, bestDistance, rect.N[bestIndex], add(supportPoint, scale(rect.N[bestIndex], bestDistance)));
-//   }
-  
-//   return hasSupport;
-// },
-
 // Test collision between two shapes
 testCollision = (c1, c2, info) => {
   
@@ -836,21 +766,10 @@ resolveCollision = (s1, s2, collisionInfo) => {
 Circle = (center, radius, mass, friction, restitution, draw = 0) => RigidShape(center, mass, friction, restitution, 0, radius, draw),
 
 // New rectangle
-Rectangle = (center, width, height, mass, friction, restitution) => RigidShape(center, mass, friction, restitution, 1, hypot(width, height)/2, width, height);
-
-// Create collision shapes around the goal so the ball cannot move outside of it. NOTE: We are being cheap here using rectangles so we don't have to include more collision code for circle inside circle
-// let constrainBallToGoal = () => {
-//   let x = goal.C.x,
-//   y = goal.C.y;
-
-//   Rectangle(Vec2(x - 20, y), 16, 40, 0, 1, 1); // l
-//   Rectangle(Vec2(x + 20, y), 16, 40, 0, 1, 1); // r
-//   Rectangle(Vec2(x, y - 20), 40, 16, 0, 1, 1); // t
-//   Rectangle(Vec2(x, y + 20), 40, 16, 0, 1, 1); // b
-// }
+Rectangle = (center, width, height, mass, friction, restitution) => RigidShape(center, mass, friction, restitution, 1, hypot(width, height)/2, width, height),
 
 // Check for, and resolve collisions between the ball and other physics shapes
-let checkResolveObjectCollisions = () => {
+checkResolveObjectCollisions = () => {
 
   for(i = objects.length; i--;){
 
@@ -914,17 +833,6 @@ let checkResolveObjectCollisions = () => {
             mouseMovePosition = null;
             putterEnabled = false;
           } // End "balll collided whilst aiming" check
-  
-
-
-
-
-
-
-
-
-
-
 
           return;
 
@@ -934,17 +842,15 @@ let checkResolveObjectCollisions = () => {
 
     } // End "ball vs ball" test
 
-
   } // End outer loop
-
-};
+},
 
 //#endregion
 
 // #region -- Hole generation
 
 // Generate the next hole
-let nextHole = () => {
+nextHole = () => {
 
   console.log('advancing to next hole');
 
@@ -1861,6 +1767,199 @@ spawnSand = () => {
   );
 },
 
+// Reposition canvas and HUD elements
+repositionContent = () => {
+
+  // Set the given elements style properties to update its position inside the browser window
+  let reposition = (e, x, y) => {
+    e.style.left = `${x}px`;
+    e.style.top = `${y}px`;
+  },
+
+  x1 = (W.innerWidth / 2) - (canvasWidth / 2),
+  y1 = (W.innerHeight / 2) - (canvasHeight / 2),
+  x2 = x1 - 210,
+  x3 = x1 + canvasWidth,
+  y3 = y1 + canvasHeight - 80;
+
+  reposition(BG_CANVAS, x1, y1);
+  reposition(OBJ_CANVAS, x1, y1);
+  reposition(getByID('hd'), x2, y1);
+  reposition( getByID('pd'), x3, y1);
+  reposition(getByID('td'), x2, y3);
+  reposition(getByID('ad'), x3, y3);
+},
+
+// Update HUD elements
+updateHUD = () => {
+
+  setTextByID('ht', gameState.hole);
+  setTextByID('pt', gameState.putts);
+  setTextByID('tt', gameState.total);
+
+  setTextByID('at', floor(gameState.total / gameState.hole));
+},
+
+// Update statistic page
+updateStatPage = () => {
+
+  updatePlayTime();
+
+  setTextByID('s1', `Holes in one: ${gameState.holesInOne}`);
+  setTextByID('s2', `Holes in two: ${gameState.holesInTwo}`);
+  setTextByID('s3', `Holes in three: ${gameState.holesInThree}`);
+
+  setTextByID('s4', `Close calls: ${gameState.closeCalls}`);
+
+  setTextByID('s5', `Bumps: ${gameState.bumps}`);
+  setTextByID('s6', `Flips: ${gameState.flips}`);
+  setTextByID('s7', `Rebounds: ${gameState.rebounds}`);
+
+  setTextByID('s8', `Sand shots: ${gameState.beached}`);
+  setTextByID('s9', `Water shots:  ${gameState.splashes}`);
+},
+
+loadGameState = () => {
+  
+  tempVar = STORAGE.getItem(SAVEFILE_NAME); // Attempt to load a previously saved game state
+
+  if (!tempVar) { // Did the load fail?
+  
+    // No data was loaded.. create a new game state
+  
+    gameState = {
+      seed: 11091968, // Random seed
+      ball: null, // The ball
+      windmills: null,
+      hole: 1, // Current hole
+      putts: 0, // Number of putts this hole
+      total: 0, // Total number of putts
+      beached: 0, // How many times the player ended up in a sand hazzard
+      splashes: 0, // How many times the player ended up in a water hazzard
+      holesInOne: 0, // How many times the ball landed in the goal in one shot
+      holesInTwo: 0, // In two shots
+      holesInThree: 0, // And three shots
+      closeCalls: 0, // How many times the ball stopped really close to the hole
+      bumps: 0, // The ball has hit a blocker this many times
+      flips: 0, // The ball has hit a windmill this many times
+      rebounds: 0, // The ball has hit a wall this many times
+      playTime: 0
+    };
+  
+    rng.setSeed(gameState.seed); // Set the random seed
+  
+    // console.log(`game state created`);
+  
+    showElement(titleScreen, true); // Show title screen (on first run)
+
+    return false;
+    
+  } else { // The load succeeded
+  
+    // Yes.. use the loaded game state
+  
+    gameState = JSON.parse(tempVar); // get the object from the saved data
+  
+    rng.setSeed(gameState.seed); // Set the random seed
+  
+    // console.log(`game state loaded`);
+  
+    generateHole(); // Generate the hole
+  
+    // console.log('restoring game state');
+    
+    // Get the windmill with the given id
+    let getWindmillByID = (id) => {
+      for (let i = 0; i < objects.length; i++) { // Check all objects
+        obstacle = objects[i];
+        if ((obstacle.isWindmill) && (obstacle.id === id)) return obstacle; // Return the windmill with the given id
+      }
+    };
+  
+    if (gameState.windmills) { // Does the game state contain any saved windmills
+      for (let i = 0; i < gameState.windmills.length; i++) { // Restore all windmills
+        tempVar = gameState.windmills[i]; // Next saved data
+        obstacle = getWindmillByID(tempVar.id);  // Next windmill
+  
+        obstacle.v = tempVar.v; // Rotation speed
+        rotateShape(obstacle, tempVar.G); // Rotate to previous angle
+  
+      } // End "restore windmills" loop
+    } // End "`gameState.windmills` exists" test
+  
+    if (gameState.ball) { // Does the game state contain a ball?
+      objects.splice(objects.indexOf(ball), 1); // Remove the ball that was created during hole generation
+
+      ball = gameState.ball; // Overwrite with the saved ball
+      objects.push(ball); // Add the saved ball to the physics objects array
+    
+      // console.log('BALL:');
+      // console.log(ball);
+  
+      if (ball.inGoal) { // Did the player leave the page when the ball was in the hole?
+
+        console.log('gamestate thinks ball is in goal');
+
+        ball.V = Vec2(0, 0); // Stop the ball
+
+        setOpacity(0); // Essentially make the entire document contents invisible
+        setMode(MODE_NONE);
+
+        nextHole(); // Advance to the next hole
+      
+      } else {
+
+        setOpacity(1); // Make the entire document contents visible
+        setMode(MODE_PLAY); // Set mode
+        putterEnabled = true;
+
+      } // End "ball in goal" check
+
+    } // End "`gameState.ball` exists" test
+  
+    updateHUD();
+    showByID('hud'); // Show HUD
+
+  } // End "game state load failed" check
+
+},
+
+// Save the game state
+saveGameState = () => {
+
+  if (objects.length > 0) { // Are there any objects to possibly save?
+    
+    tempVar = [];
+
+    for (let i = 0; i < objects.length; i++) { // Check all objects
+
+      obstacle = objects[i]; // Next object
+      
+      if (obstacle.isWindmill) { // Is this obstacle a windmill?
+
+        tempVar.push({ // Add the relevant data to the array
+          id: obstacle.id, // ID
+          v: obstacle.v, // Rotation velocity
+          G: obstacle.G // Rotation
+        });
+        
+      } // End "is windmill" check
+  
+    } // End "check all objects" loop
+  
+    gameState.windmills = tempVar;
+
+  } // End "objects might need saving" check
+
+  gameState.ball = ball; // This is qicker and less code than extracting and storing ONLY the required variables
+
+  gameState.playTime += ((Date.now() - launchTime) / 1000);
+
+    // STORAGE.removeItem(SAVEFILE_NAME);
+    
+    STORAGE.setItem(SAVEFILE_NAME, JSON.stringify(gameState));
+};
+
 //#region -- Putter management (aiming, putting, rendering)
 
 // Erase the area where the putter was, in preperation to draw it in its new position/orientation
@@ -1913,8 +2012,14 @@ resetPutter = () => {
 };
 
 
+
+
+
+
 // Save the position of the `mousedown` event (when the left mouse button was pressed down)
 D.onmousedown = (e) => {
+  console.log(`putterenabled:${putterEnabled} b:${e.button} m:${gameMode}`);
+
   if ((putterEnabled) && (e.button === 0) && (gameMode === MODE_PLAY)) {
     if (length(ball.V) === 0) mouseDownPosition = Vec2(e.x, e.y); // Create the mouse down coordinates ONLY if the ball is also not moving
   }
@@ -1989,40 +2094,46 @@ D.onmousemove = (e) => {
 
 // Initiate a new putt if the putter is enabled, the left mouse was released, and `mouseDownPosition` exists
 D.onmouseup = (e) => {
+  console.log(`putterenabled:${putterEnabled} b:${e.button} m:${gameMode}`);
+
   if ((putterEnabled) &&(e.button === 0) && (mouseDownPosition) && (gameMode === MODE_PLAY)) {
 
     erasePutter();
 
     mouseMovePosition = null;
     mouseDownPosition = null;
-
-    // Yes.. initiate a new putt
-
-    putterEnabled = false; // Prevent putter aiming
-
-    if (ball.inSand) { // Is the ball currently in the sand?
-
-      fx_play(SOUND_SAND); // Play the sand sound effect
-      spawnSand(); // Create a sand particle moving in a random direction
-
-    } else {
-
-      fx_play(SOUND_PUTT); // Play the normal putting sound effect
-    }
-
-    ballResetPosition = ball.C; // Save position for edge cases where the ball escapes the confines of the hole
-
-    let puttMagnitude = putterLength / MAX_PUTTER_LENGTH; // Get magnitude (0-1)
-
-    ball.V = Vec2(cos(puttAngle) * (puttMagnitude * MAX_BALL_SPEED), sin(puttAngle) * (puttMagnitude * MAX_BALL_SPEED)); // Set the balls velocity
-
-    putterLength = 0; // Set to 0 to stop phantom putts
-
-    gameState.putts ++;
-
-    gameState.total ++;
-
-    updateHUD();
+    
+    if (putterLength >= MIN_PUTTER_LENGTH) { // Is the putter at least the minimum length?
+  
+      // Yes.. initiate a new putt
+  
+      putterEnabled = false; // Prevent putter aiming
+  
+      if (ball.inSand) { // Is the ball currently in the sand?
+  
+        fx_play(SOUND_SAND); // Play the sand sound effect
+        spawnSand(); // Create a sand particle moving in a random direction
+  
+      } else {
+  
+        fx_play(SOUND_PUTT); // Play the normal putting sound effect
+      }
+  
+      ballResetPosition = ball.C; // Save position for edge cases where the ball escapes the confines of the hole
+  
+      let puttMagnitude = putterLength / MAX_PUTTER_LENGTH; // Get magnitude (0-1)
+  
+      ball.V = Vec2(cos(puttAngle) * (puttMagnitude * MAX_BALL_SPEED), sin(puttAngle) * (puttMagnitude * MAX_BALL_SPEED)); // Set the balls velocity
+  
+      putterLength = 0; // Set to 0 to stop phantom putts
+  
+      gameState.putts ++;
+  
+      gameState.total ++;
+  
+      updateHUD();
+  
+    } // End "putter length ok" check
 
   } // End "putter enabled, and mousedown and up exist" check
 };
@@ -2042,13 +2153,14 @@ D.onkeyup = (e) => {
         break;
     
       case 16: // SHIFT key released?
-        showElement(statScreen, false); // Hide the stats screen
+        showElement(statsScreen, false); // Hide the stats screen
         statsVisible = false;
         e.preventDefault();
         break;
 
       case 8: // BACKSPACE key released?
         resetPutter();
+        putterEnabled = false;
         showElement(resetScreen, true);
         e.preventDefault();
         break;
@@ -2084,10 +2196,6 @@ D.onkeydown = (e) => {
     e.preventDefault();
   }
 
-
-
-
-
 };
 
 //#endregion
@@ -2096,218 +2204,14 @@ D.onkeydown = (e) => {
 
 
 
-//#region -- Content repositioning on browser window resize
 
-// Reposition canvas and HUD elements
-let repositionContent = () => {
-
-  // Set the given elements style properties to update its position inside the browser window
-  let reposition = (e, x, y) => {
-    e.style.left = `${x}px`;
-    e.style.top = `${y}px`;
-  },
-
-  x1 = (W.innerWidth / 2) - (canvasWidth / 2),
-  y1 = (W.innerHeight / 2) - (canvasHeight / 2),
-  x2 = x1 - 210,
-  x3 = x1 + canvasWidth,
-  y3 = y1 + canvasHeight - 80;
-
-  reposition(BG_CANVAS, x1, y1);
-  reposition(OBJ_CANVAS, x1, y1);
-  reposition(getByID('hd'), x2, y1);
-  reposition( getByID('pd'), x3, y1);
-  reposition(getByID('td'), x2, y3);
-  reposition(getByID('ad'), x3, y3);
-};
 
 W.onresize = repositionContent; // Reposition content whenever the browser window is resized
 
-
-//#endregion
-
-let updateHUD = () => {
-
-  setTextByID('ht', gameState.hole);
-  setTextByID('pt', gameState.putts);
-  setTextByID('tt', gameState.total);
-
-  setTextByID('at', floor(gameState.total / gameState.hole));
-},
-
-// Update statistic page
-updateStatPage = () => {
-
-  updatePlayTime();
-
-  setTextByID('s1', `Holes in one: ${gameState.holesInOne}`);
-  setTextByID('s2', `Holes in two: ${gameState.holesInTwo}`);
-  setTextByID('s3', `Holes in three: ${gameState.holesInThree}`);
-
-  setTextByID('s4', `Close calls: ${gameState.closeCalls}`);
-
-  setTextByID('s5', `Bumps: ${gameState.bumps}`);
-  setTextByID('s6', `Flips: ${gameState.flips}`);
-  setTextByID('s7', `Rebounds: ${gameState.rebounds}`);
-
-  setTextByID('s8', `Sand shots: ${gameState.beached}`);
-  setTextByID('s9', `Water shots:  ${gameState.splashes}`);
-},
-
-// #region -- Game state management
-
-loadGameState = () => {
-  
-  tempVar = STORAGE.getItem(SAVEFILE_NAME); // Attempt to load a previously saved game state
-
-  if (!tempVar) { // Did the load fail?
-  
-    // No data was loaded.. create a new game state
-  
-    gameState = {
-      seed: 11091968, // Random seed
-      ball: null, // The ball
-      windmills: null,
-      hole: 1, // Current hole
-      putts: 0, // Number of putts this hole
-      total: 0, // Total number of putts
-      beached: 0, // How many times the player ended up in a sand hazzard
-      splashes: 0, // How many times the player ended up in a water hazzard
-      holesInOne: 0, // How many times the ball landed in the goal in one shot
-      holesInTwo: 0, // In two shots
-      holesInThree: 0, // And three shots
-      closeCalls: 0, // How many times the ball stopped really close to the hole
-      bumps: 0, // The ball has hit a blocker this many times
-      flips: 0, // The ball has hit a windmill this many times
-      rebounds: 0, // The ball has hit a wall this many times
-      playTime: 0
-    };
-  
-    rng.setSeed(gameState.seed); // Set the random seed
-  
-    console.log(`game state created`);
-  
-    showByID('ts'); // Show title screen (on first run)
-
-    return false;
-    
-  } else { // The load succeeded
-  
-    // Yes.. use the loaded game state
-  
-    gameState = JSON.parse(tempVar); // get the object from the saved data
-  
-    rng.setSeed(gameState.seed); // Set the random seed
-  
-    console.log(`game state loaded`);
-  
-    generateHole(); // Generate the hole
-  
-    console.log('restoring game state');
-    
-    // Get the windmill with the given id
-    let getWindmillByID = (id) => {
-      for (let i = 0; i < objects.length; i++) { // Check all objects
-        obstacle = objects[i];
-        if ((obstacle.isWindmill) && (obstacle.id === id)) return obstacle; // Return the windmill with the given id
-      }
-    };
-  
-    if (gameState.windmills) { // Does the game state contain any saved windmills
-      for (let i = 0; i < gameState.windmills.length; i++) { // Restore all windmills
-        tempVar = gameState.windmills[i]; // Next saved data
-        obstacle = getWindmillByID(tempVar.id);  // Next windmill
-  
-        obstacle.v = tempVar.v; // Rotation speed
-        rotateShape(obstacle, tempVar.G); // Rotate to previous angle
-  
-      } // End "restore windmills" loop
-    } // End "`gameState.windmills` exists" test
-  
-    if (gameState.ball) { // Does the game state contain a ball?
-      objects.splice(objects.indexOf(ball), 1); // Remove the ball that was created during hole generation
-
-      ball = gameState.ball; // Overwrite with the saved ball
-      objects.push(ball); // Add the saved ball to the physics objects array
-    
-      console.log('BALL:');
-      console.log(ball);
-  
-      if (ball.inGoal) { // Did the player leave the page when the ball was in the hole?
-
-        console.log('gamestate thinks ball is in goal');
-
-        ball.V = Vec2(0, 0); // Stop the ball
-
-        setOpacity(0); // Essentially make the entire document contents invisible
-        setMode(MODE_NONE);
-
-        nextHole(); // Advance to the next hole
-      
-      } else {
-
-        setOpacity(1); // Make the entire document contents visible
-        setMode(MODE_PLAY); // Set mode
-        putterEnabled = true;
-
-      } // End "ball in goal" check
-
-    } // End "`gameState.ball` exists" test
-  
-    updateHUD();
-    showByID('hud'); // Show HUD
-
-  } // End "game state load failed" check
-
-};
-
-// Save the game state
-let saveGameState = () => {
-
-  if (objects.length > 0) { // Are there any objects to possibly save?
-    
-    tempVar = [];
-
-    for (let i = 0; i < objects.length; i++) { // Check all objects
-
-      obstacle = objects[i]; // Next object
-      
-      if (obstacle.isWindmill) { // Is this obstacle a windmill?
-
-        tempVar.push({ // Add the relevant data to the array
-          id: obstacle.id, // ID
-          v: obstacle.v, // Rotation velocity
-          G: obstacle.G // Rotation
-        });
-        
-      } // End "is windmill" check
-  
-    } // End "check all objects" loop
-  
-    gameState.windmills = tempVar;
-
-  } // End "objects might need saving" check
-
-  gameState.ball = ball; // This is qicker and less code than extracting and storing ONLY the required variables
-
-  gameState.playTime += ((Date.now() - launchTime) / 1000);
-
-    // STORAGE.removeItem(SAVEFILE_NAME);
-    
-    STORAGE.setItem(SAVEFILE_NAME, JSON.stringify(gameState));
-};
-
 W.onbeforeunload = saveGameState; // Save the game state whenever the page is closed
-
-
-
-
-
 
 // When the page is loaded, execute this code, which actually starts the ball rolling (pun fully intended)
 W.onload = () => {
-
-  console.log('page loaded');
 
   // 
   // Get various screens
@@ -2326,20 +2230,20 @@ W.onload = () => {
   // Create menu buttons
   // 
 
-  titleScreenButtons.appendChild(newButton('OK', () => {
+  titleScreenButtons.appendChild(newButton('OK', () => { // Close title screen button
     fx_play(SOUND_BUTTON); // Play sound effect
     showElement(titleScreen, false); // Hide title screen
     setMode(MODE_INSTRUCTIONS); // Set mode
     showElement(instructionScreen, true); // Show instruction screen
   }));
 
-  instructionScreenButtons.appendChild(newButton('OK', () => {
+  instructionScreenButtons.appendChild(newButton('OK', () => { // Close instructions screen button
     fx_play(SOUND_BUTTON); // Play sound effect
     showElement(instructionScreen, false); // Hide instruction screen
 
     instructionsVisible = false;
 
-    if (!dontResetOnInstructionsClosed) {
+    if (!dontResetOnInstructionsClosed) { // Should the game generate a hole when the instructions screen is closed?
       setOpacity(0); // Essentially make the entire document contents invisible
   
       generateHole(); // Generate the current hole
@@ -2348,26 +2252,20 @@ W.onload = () => {
     
       fadeInOutCounter = 0;
       setMode(MODE_FADE_IN); // Set mode
-    }
-
-
+    } // End "generate on instructions closed" check
   }));
 
-  resetScreenButtons.appendChild(newButton('YES', () => {
+  resetScreenButtons.appendChild(newButton('YES', () => { // Confirm reset button
     showElement(resetScreen, false);
     W.onbeforeunload = null; // Stop the gamestate being saved, which would cause the game to not fully reset
     STORAGE.removeItem(SAVEFILE_NAME); // Remove the local data
     location.reload(); // Reload!
   }));
 
-  resetScreenButtons.appendChild(newButton('NO', () => {
+  resetScreenButtons.appendChild(newButton('NO', () => { // Cancel reset button
     showElement(resetScreen, false);
+    putterEnabled = true;
   }));
-
-
-
-
-
 
   ATLAS = getByID('i'); // Get the image from the HTML document, which contains particle imagery
 
@@ -2386,8 +2284,10 @@ W.onload = () => {
   // Putter will be drawn on this canvas
   FG_CANVAS = newCanvas(W.innerWidth, W.innerHeight, 'fg');
   FG_CTX = FG_CANVAS.ctx;
-  
+
+  // 
   // Create the soundbank
+  // 
   
   fx_add([1,409,.01,.09,.09,1,.45,-11,3.5,0,0,0,0,0,0,0,.94,0,0]); // SOUND_WATER
   fx_add([1,1888,0,.01,.11,4,2.88,0,-5.9,0,0,0,0,143,0,0,1,.11,0]); // SOUND_SAND
@@ -2400,28 +2300,19 @@ W.onload = () => {
   fx_add([1,47,.01,.09,.09,4,1.81,0,0,0,0,0,0,0,0,0,.57,.02,0]); // SOUND_BLOCKER
   fx_add([1,377,.02,.01,.01,3,1.97,0,-34,613,.12,0,0,-84,0,0,1,.02,.07]); // SOUND_WINDMILL
   fx_add([1.88,575,.09,.18,.41,2,.09,-1.4,0,124,.18,.11,0,0,0,.16,.81,.21,.46]); // SOUND_BALLFIXED
-  
 
   loadGameState();
 
-  console.log('GAMESTATE:')
-  console.log(gameState);
-  
+  // console.log('GAMESTATE:')
+  // console.log(gameState);
 
   repositionContent(); // Perform initial rescale
-
-
-
   
-lastFrame = Date.now(); // Set the (fake) last EnterFrame event time
-onEnterFrame(); // Request the first actual EnterFrame event
-
-
+  lastFrame = Date.now(); // Set the (fake) last EnterFrame event time
+  onEnterFrame(); // Request the first actual EnterFrame event
 };
 
 
-
-// #endregion
 
 
 
