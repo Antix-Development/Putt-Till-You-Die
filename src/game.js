@@ -77,10 +77,11 @@ SOUND_WINDMILL    = 9,
 SOUND_BALLFIXED   = 10,
 
 MODE_NONE         = 0, // Game modes
-MODE_INSTRUCTIONS = 1,
-MODE_PLAY         = 2,
-MODE_FADE_OUT     = 3, // Fade out between holes
-MODE_FADE_IN      = 4, // Fade in new hole
+MODE_TITLE        = 1,
+MODE_INSTRUCTIONS = 2,
+MODE_PLAY         = 3,
+MODE_FADE_OUT     = 4, // Fade out between holes
+MODE_FADE_IN      = 5, // Fade in new hole
 
 oneCell           = 160, // Hardcoded sizes for drawing nodes
 halfCell          = 80,
@@ -138,7 +139,7 @@ ballInSand,
 
 friction,
 
-gameMode = MODE_NONE, // Current game mode
+gameMode = MODE_TITLE, // Current game mode
 
 ball = null, // The ball
 ballResetPosition,
@@ -194,14 +195,6 @@ appendToDocumentBody =(el) => D.body.appendChild(el),
 // Set the opacity of the documents body, essentially allowing the entire display to fade in and out of the background
 setOpacity = (opacity) => D.body.style.opacity = `${opacity}`,
 
-// Hide the HTML element with the given id
-hideByID = (id) => getByID(id).classList.add('i'),
-
-// Show the HTML element with the given id
-showByID = (id) => getByID(id).classList.remove('i'),
-
-
-
 // Make the given HTML element visible or invisible, according to the given state
 showElement = (el, state) => (state) ? el.classList.remove('i') : el.classList.add('i'),
 
@@ -214,7 +207,7 @@ clamp = (v, min, max) => v < min ? min : v > max ? max : v,
 // Set the game mode
 setMode = (mode) => {
   gameMode = mode;
-  console.log(`gameMode changed to ${['MODE_NONE', 'MODE_INSTRUCTIONS', 'MODE_PLAY', 'MODE_FADE_OUT', 'MODE_FADE_IN'][mode]}`);
+  //console.log(`gameMode changed to ${['MODE_NONE', 'MODE_TITLE', 'MODE_INSTRUCTIONS', 'MODE_PLAY', 'MODE_FADE_OUT', 'MODE_FADE_IN'][mode]}`);
 },
 
 // Create a new button with the given label and onclick function
@@ -805,19 +798,19 @@ checkResolveObjectCollisions = () => {
               fx_play(SOUND_WINDMILL);
               gameState.flips  ++;
               statUpdateRequired = true;
-              console.log('ball hit windmill');
+              //console.log('ball hit windmill');
               
             } else if (other.isBlocker) {
               fx_play(SOUND_BLOCKER);
               gameState.bumps  ++;
               statUpdateRequired = true;
-              console.log('ball hit blocker');
+              //console.log('ball hit blocker');
 
             } else {
               fx_play(SOUND_WALL);
               gameState.rebounds ++;
               statUpdateRequired = true;
-              console.log('ball hit wall');
+              //console.log('ball hit wall');
             }
 
           } // End "ball in goal" check
@@ -852,7 +845,7 @@ checkResolveObjectCollisions = () => {
 // Generate the next hole
 nextHole = () => {
 
-  console.log('advancing to next hole');
+  //console.log('advancing to next hole');
 
   gameState.hole ++;
   gameState.putts = 0;
@@ -922,11 +915,11 @@ generateHole = () => {
 
   trim();
 
-  // console.log(`Path bounds = left: ${path.leftEdge} right: ${path.rightEdge} top: ${path.topEdge} bottom: ${path.bottomEdge} width: ${(path.rightEdge - path.leftEdge) + 1} height: ${path.bottomEdge + 1}`);
+  // //console.log(`Path bounds = left: ${path.leftEdge} right: ${path.rightEdge} top: ${path.topEdge} bottom: ${path.bottomEdge} width: ${(path.rightEdge - path.leftEdge) + 1} height: ${path.bottomEdge + 1}`);
 
   finalizeAndDrawHole();
 
-  console.log('hole generated');
+  //console.log('hole generated');
 
 },
 
@@ -1094,7 +1087,7 @@ generateMainPathNodes = (params) => {
       path.firstNode = node;
       node.isFirstNode = true;
 
-      console.log('hole direction reversed');
+      //console.log('hole direction reversed');
 
     } else {
 
@@ -1357,25 +1350,25 @@ generateExtraPathNodes = (params) => {
           switch (node.extraDirection) {
 
             case PATH_NORTH: // 1
-              console.log(`case:north (1) generating extra at r:${node.row} c:${node.col}`);
+              //console.log(`case:north (1) generating extra at r:${node.row} c:${node.col}`);
               openNodeWall(nodes[node.row - 1][node.col], PATH_SOUTH); // Other node
               openNodeWall(node, PATH_NORTH); // This node
               break;
           
             case PATH_SOUTH: // 4
-              console.log(`case:south (4) generating extra at r:${node.row} c:${node.col}`);
+              //console.log(`case:south (4) generating extra at r:${node.row} c:${node.col}`);
               openNodeWall(nodes[node.row + 1][node.col], PATH_NORTH);
               openNodeWall(node, PATH_SOUTH);
               break;
     
             case PATH_EAST: // 2
-              console.log(`case:east (2) generating extra at r:${node.row} c:${node.col}`);
+              //console.log(`case:east (2) generating extra at r:${node.row} c:${node.col}`);
               openNodeWall(nodes[node.row][node.col + 1], PATH_WEST);
               openNodeWall(node, PATH_EAST);
               break;
     
             default: // The only other direction possible is PATH_WEST (8)
-              console.log(`case:west (8) generating extra at r:${node.row} c:${node.col}`);
+              //console.log(`case:west (8) generating extra at r:${node.row} c:${node.col}`);
               openNodeWall(nodes[node.row][node.col - 1], PATH_EAST);
               openNodeWall(node, PATH_WEST);
               break;
@@ -1451,7 +1444,7 @@ finalizeAndDrawHole = () => {
 
       if (node.partOfPath) { // Only process nodes that are part of the path (grass, water hazzards, and sand hazzards)
 
-        // console.log(`r=${r} c=${c}  bitMask=${node.bitMask}`);
+        // //console.log(`r=${r} c=${c}  bitMask=${node.bitMask}`);
 
         // Calculate where the node will be drawn on the background canvas
         x = node.x,//;(c * oneCell) + ((5 - path.width) * halfCell),
@@ -1496,7 +1489,7 @@ finalizeAndDrawHole = () => {
 
             ball.draw = true;
 
-            console.log(`created ball at r:${r} c:${c}`);
+            //console.log(`created ball at r:${r} c:${c}`);
 
           } else if (node.isLastNode) { // The last node is where the goal is spawned
 
@@ -1513,7 +1506,7 @@ finalizeAndDrawHole = () => {
             BG_CTX.fill();
             BG_CTX.stroke();
 
-            console.log(`created goal at r:${r} c:${c}`);
+            //console.log(`created goal at r:${r} c:${c}`);
 
           } else { // All empty nodes have a chance to contain an obstacle
 
@@ -1536,7 +1529,7 @@ finalizeAndDrawHole = () => {
                 obstacle.id = id++;
                 obstacle.draw = true;
 
-                console.log(`created windmill at r:${r} c:${c}`);
+                //console.log(`created windmill at r:${r} c:${c}`);
                 
               } else {
 
@@ -1551,7 +1544,7 @@ finalizeAndDrawHole = () => {
                 obstacle.draw = true;
                 // random() < .5 ? obstacle.v = 1.5 : obstacle.v = -1.5; // 50% of windmills will rotate clockwise, the other 50% will rotate anti-clockwise
                 
-                console.log(`created blocker at r:${r} c:${c}`);
+                //console.log(`created blocker at r:${r} c:${c}`);
 
               } // End "obstacle creation type" decision
 
@@ -1843,12 +1836,13 @@ loadGameState = () => {
       bumps: 0, // The ball has hit a blocker this many times
       flips: 0, // The ball has hit a windmill this many times
       rebounds: 0, // The ball has hit a wall this many times
-      playTime: 0
+      playTime: 0,
+      mode: 0
     };
   
     rng.setSeed(gameState.seed); // Set the random seed
   
-    // console.log(`game state created`);
+    // //console.log(`game state created`);
   
     showElement(titleScreen, true); // Show title screen (on first run)
 
@@ -1862,63 +1856,81 @@ loadGameState = () => {
   
     rng.setSeed(gameState.seed); // Set the random seed
   
-    // console.log(`game state loaded`);
-  
-    generateHole(); // Generate the hole
-  
-    // console.log('restoring game state');
+    // //console.log(`game state loaded`);
+
+    switch (gameState.mode) {
+      case MODE_TITLE:
+        showElement(titleScreen, true);
+        setMode(MODE_TITLE);
+        break;
     
-    // Get the windmill with the given id
-    let getWindmillByID = (id) => {
-      for (let i = 0; i < objects.length; i++) { // Check all objects
-        obstacle = objects[i];
-        if ((obstacle.isWindmill) && (obstacle.id === id)) return obstacle; // Return the windmill with the given id
-      }
-    };
-  
-    if (gameState.windmills) { // Does the game state contain any saved windmills
-      for (let i = 0; i < gameState.windmills.length; i++) { // Restore all windmills
-        tempVar = gameState.windmills[i]; // Next saved data
-        obstacle = getWindmillByID(tempVar.id);  // Next windmill
-  
-        obstacle.v = tempVar.v; // Rotation speed
-        rotateShape(obstacle, tempVar.G); // Rotate to previous angle
-  
-      } // End "restore windmills" loop
-    } // End "`gameState.windmills` exists" test
-  
-    if (gameState.ball) { // Does the game state contain a ball?
-      objects.splice(objects.indexOf(ball), 1); // Remove the ball that was created during hole generation
-
-      ball = gameState.ball; // Overwrite with the saved ball
-      objects.push(ball); // Add the saved ball to the physics objects array
+      case MODE_INSTRUCTIONS:
+        showElement(instructionScreen, true);
+        setMode(MODE_INSTRUCTIONS);
+        break;
     
-      // console.log('BALL:');
-      // console.log(ball);
+      default: // for all other modes, generate the hole and start the game
+
+        generateHole(); // Generate the hole
   
-      if (ball.inGoal) { // Did the player leave the page when the ball was in the hole?
-
-        console.log('gamestate thinks ball is in goal');
-
-        ball.V = Vec2(0, 0); // Stop the ball
-
-        setOpacity(0); // Essentially make the entire document contents invisible
-        setMode(MODE_NONE);
-
-        nextHole(); // Advance to the next hole
+        // //console.log('restoring game state');
+        
+        // Get the windmill with the given id
+        let getWindmillByID = (id) => {
+          for (let i = 0; i < objects.length; i++) { // Check all objects
+            obstacle = objects[i];
+            if ((obstacle.isWindmill) && (obstacle.id === id)) return obstacle; // Return the windmill with the given id
+          }
+        };
       
-      } else {
+        if (gameState.windmills) { // Does the game state contain any saved windmills
+          for (let i = 0; i < gameState.windmills.length; i++) { // Restore all windmills
+            tempVar = gameState.windmills[i]; // Next saved data
+            obstacle = getWindmillByID(tempVar.id);  // Next windmill
+      
+            obstacle.v = tempVar.v; // Rotation speed
+            rotateShape(obstacle, tempVar.G); // Rotate to previous angle
+      
+          } // End "restore windmills" loop
+        } // End "`gameState.windmills` exists" test
+      
+        if (gameState.ball) { // Does the game state contain a ball?
 
-        setOpacity(1); // Make the entire document contents visible
-        setMode(MODE_PLAY); // Set mode
+          objects.splice(objects.indexOf(ball), 1); // Remove the ball that was created during hole generation
+    
+          ball = gameState.ball; // Overwrite with the saved ball
+          objects.push(ball); // Add the saved ball to the physics objects array
+        
+          // //console.log('BALL:');
+          // //console.log(ball);
+      
+          if (ball.inGoal) { // Did the player leave the page when the ball was in the hole?
+    
+            // //console.log('gamestate thinks ball is in goal');
+    
+            ball.V = Vec2(0, 0); // Stop the ball
+    
+            setOpacity(0); // Essentially make the entire document contents invisible
+            setMode(MODE_NONE);
+    
+            nextHole(); // Advance to the next hole
+          
+          } else {
+    
+            setOpacity(1); // Make the entire document contents visible
+            setMode(MODE_PLAY); // Set mode
+    
+          } // End "ball in goal" check
+    
+        } // End "`gameState.ball` exists" test
+      
+        updateHUD();
+        showElement(hudScreen, true); // Show HUD
+
         putterEnabled = true;
 
-      } // End "ball in goal" check
-
-    } // End "`gameState.ball` exists" test
-  
-    updateHUD();
-    showByID('hud'); // Show HUD
+      break;
+    }
 
   } // End "game state load failed" check
 
@@ -1953,6 +1965,7 @@ saveGameState = () => {
 
   gameState.ball = ball; // This is qicker and less code than extracting and storing ONLY the required variables
 
+  gameState.mode = gameMode; // Save to resolve issue where player presses F5 whilst in menus and the putter is not enabled
   gameState.playTime += ((Date.now() - launchTime) / 1000);
 
     // STORAGE.removeItem(SAVEFILE_NAME);
@@ -1995,7 +2008,7 @@ erasePutter = () => {
 
     FG_CTX.clearRect(x - 8, y - 8, w + 16, h + 16); // Clear the rectangle (expanded by 3 pixels on each edge)
 
-    // console.log(`erasePutter() x=${x} y=${y} w=${w} h=${h}`);
+    // //console.log(`erasePutter() x=${x} y=${y} w=${w} h=${h}`);
   }
 },
 
@@ -2011,15 +2024,8 @@ resetPutter = () => {
 
 };
 
-
-
-
-
-
 // Save the position of the `mousedown` event (when the left mouse button was pressed down)
 D.onmousedown = (e) => {
-  console.log(`putterenabled:${putterEnabled} b:${e.button} m:${gameMode}`);
-
   if ((putterEnabled) && (e.button === 0) && (gameMode === MODE_PLAY)) {
     if (length(ball.V) === 0) mouseDownPosition = Vec2(e.x, e.y); // Create the mouse down coordinates ONLY if the ball is also not moving
   }
@@ -2094,7 +2100,6 @@ D.onmousemove = (e) => {
 
 // Initiate a new putt if the putter is enabled, the left mouse was released, and `mouseDownPosition` exists
 D.onmouseup = (e) => {
-  console.log(`putterenabled:${putterEnabled} b:${e.button} m:${gameMode}`);
 
   if ((putterEnabled) &&(e.button === 0) && (mouseDownPosition) && (gameMode === MODE_PLAY)) {
 
@@ -2140,7 +2145,7 @@ D.onmouseup = (e) => {
 
 // Manage key up events
 D.onkeyup = (e) => {
-  console.log(e);
+  // //console.log(e);
 
   if (gameMode === MODE_PLAY) {
 
@@ -2182,13 +2187,13 @@ D.onkeyup = (e) => {
 
 // Manage key down events
 D.onkeydown = (e) => {
-  // console.log(e);
+  // //console.log(e);
 
   if ((e.keyCode === 16) && (gameMode === MODE_PLAY) && (!statsVisible)) { // was the SHIFT key pressed?
 
     updateStatPage();
 
-    showByID('ss');
+    showElement(statsScreen, true);
 
     secondCounter = 0; // Reset counter for live elapsed play time
     statsVisible = true;
@@ -2303,8 +2308,8 @@ W.onload = () => {
 
   loadGameState();
 
-  // console.log('GAMESTATE:')
-  // console.log(gameState);
+  // //console.log('GAMESTATE:')
+  // //console.log(gameState);
 
   repositionContent(); // Perform initial rescale
   
@@ -2328,7 +2333,7 @@ let checkResolveHazzardCollisions = () => {
 
       const hazzard = hazzards[i]; // Next hazzard
 
-      // console.log(hazzard);
+      // //console.log(hazzard);
 
       if (ballResetX > hazzard.x && ballResetX < hazzard.x + oneCell && ballResetY > hazzard.y && ballResetY < hazzard.y + oneCell) { // Check if the ball has entered the hazzard
 
@@ -2526,18 +2531,18 @@ onEnterFrame = () => {
       nodes = path.pathNodes; // Get nodes
       node = nodes[0][0]; // Get first node
 
-      // console.log(`${floor((ballY - node.y) / oneCell)}, ${floor((ballX - node.x) / oneCell)}`);
+      // //console.log(`${floor((ballY - node.y) / oneCell)}, ${floor((ballX - node.x) / oneCell)}`);
 
       let node2 = nodes[floor((ballY - node.y) / oneCell)][floor((ballX - node.x) / oneCell)];
       if (!node2.partOfPath) {
         fixBall = true; // Fix required!
-        console.log('ball escaped confines of hole')
+        //console.log('ball escaped confines of hole')
       }
 
     } else { // Whoops, somehow the ball escaped!
 
       fixBall = true; // Fix required!
-      console.log('ball entirely left the canvas!');
+      //console.log('ball entirely left the canvas!');
 
     } // End "ball inside canvas" check
 
@@ -2655,7 +2660,7 @@ onEnterFrame = () => {
 
         } // End "hole in one" test
 
-        console.log('The ball is in the goal');
+        //console.log('The ball is in the goal');
        
         ball.inGoal = true; // The ball is officially in the hole
 
@@ -2669,7 +2674,7 @@ onEnterFrame = () => {
 
         ball.C = goal.C; // Dirty kludge
 
-        console.log('ball is in goal, but outside goal at the same time. fixed');
+        //console.log('ball is in goal, but outside goal at the same time. fixed');
 
       } // End "ball's center inside goal" check
 
